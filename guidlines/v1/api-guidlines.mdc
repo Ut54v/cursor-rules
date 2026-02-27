@@ -1,0 +1,37 @@
+---
+description: REST API design — URLs, methods, status codes, errors, and consistency
+globs: **/*api*
+alwaysApply: false
+---
+
+# REST API Best Practices
+
+When designing or calling REST APIs, follow these conventions.
+
+## URLs & resources
+- Use **nouns, plural**: `GET /users`, `POST /users` — not `/getUsers` or `/createUser`.
+- Keep hierarchy shallow: `GET /users/{userId}/photos` is fine; avoid 4+ levels.
+- Lowercase + hyphens: `/photo-albums`, not `/PhotoAlbums` or `user_profiles`.
+
+## HTTP methods & status codes
+- Use methods semantically: GET (read), POST (create), PUT (replace), PATCH (partial update), DELETE (remove).
+- Never return `200 OK` for errors. Use: `400` validation, `401` unauthenticated, `403` forbidden, `404` not found, `422` business rules, `429` rate limit, `5xx` server errors.
+- Success: `200` GET/PUT/PATCH, `201` POST, `204` DELETE.
+
+## Requests & responses
+- Query params for filtering/pagination: `GET /photos?page=1&per_page=25&sort=created_at&order=desc`.
+- Path params for resource IDs: `GET /users/{userId}`. Body for create/update (JSON).
+- Consistent envelope: `{ "status": "success", "data": {...}, "meta": { "total", "page", "per_page" } }` for collections.
+- Use **camelCase** for JSON and **ISO 8601** for dates. Do not expose passwords, tokens, or stack traces.
+
+## Errors
+- Descriptive, actionable errors with `status`, `code`, `message`, and optional `errors[]` (field + issue).
+- Never expose internal details (e.g. `NullPointerException`); use a reference ID for support.
+
+## Auth & security
+- Send auth via `Authorization: Bearer <token>` — never in query or URL.
+- Use HTTPS, validate inputs server-side, implement rate limiting, and document with OpenAPI/Swagger.
+
+## Quick reference
+- **DO**: Version from start (`/v1/`), paginate collections, use consistent error shape, document endpoints.
+- **DON'T**: Use verbs in URLs, return unbounded lists, put tokens in query params, break compatibility within a version.
